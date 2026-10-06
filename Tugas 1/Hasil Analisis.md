@@ -57,6 +57,17 @@ Memisahkan sistem menjadi beberapa service meningkatkan skalabilitas dan reliabi
 
 ---
 
-## Kesimpulan Kelompok
+## Kesimpulan Kelompok  — ditulis Nazriel Irham Pratama Putra
 
-[Ringkasan: jika FoodGo memperbaiki ketiga pitfall ini, apa arsitektur yang disarankan secara garis besar? Kaitkan dengan Tugas 2.]
+Ketiga perangkap (Jaringan Terpercaya, Latensi Nol, dan Satu Titik Kegagalan) adalah akibat dari asumsi yang sama - FoodGo telah dibangun berdasarkan asumsi bahwa semua komponen selalu dapat diakses dan cepat. Solusinya adalah desain arsitektur berdasarkan prinsip merencanakan kegagalan.
+
+**Arsitektur yang direkomendasikan:**
+
+Monolit yang dibagi menjadi Layanan Pesanan, Pembayaran dan Pemberitahuan; semua layanan dijalankan dalam beberapa instance di belakang load balancer (mengatasi Perangkap 3).
+Komunikasi sinkronis defensif terutama dari Layanan Pesanan ke Layanan Pembayaran; termasuk timeout, percobaan ulang dengan backoff eksponensial dan batas percobaan ulang, dan pemutus sirkuit (mengatasi Perangkap 1 dan 2).
+Komunikasi asinkron melalui antrian pesan untuk operasi yang tidak memerlukan respon segera seperti pemberitahuan kurir (mengatasi Perangkap 1 dan 2).
+Kunci idempotensi untuk pembayaran untuk menghindari pengisian ulang biaya saat percobaan ulang.
+
+**Tukar menukar:** Keandalan dan skalabilitas meningkat tetapi kompleksitas operasi meningkat bersama dengan kompleksitas konsistensi antar layanan (konsistensi akhir).Kami rasa hal ini dibenarkan karena FoodGo membutuhkan ketersediaan tinggi pada saat beban puncaknya.
+
+**Koneksi dengan Tugas 2:** Desain diatas akan menjadi dasar dari diagram arsitektur pada Tugas 2.
