@@ -7,7 +7,7 @@
 | Davin Ahmad Radita | 103072400055 | Pitfall 1 |
 | Nazriel Irham Pratama Putra | 103072400062 | [pitfall/bagian yang dikerjakan] |
 | Gevin Shinarsa Pratama | 103072400080 | pitfall 2 |
-| Yoga Krisna Putra | 103072400104 | [pitfall/bagian yang dikerjakan] |
+| Yoga Krisna Putra | 103072400104 | pitfall 3 |
 
 ## Pitfall 1: The Network Is Reliable — ditulis oleh Davin Ahmad Radita
 
