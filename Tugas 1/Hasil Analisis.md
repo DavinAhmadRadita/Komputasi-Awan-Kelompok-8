@@ -23,17 +23,17 @@
 
 ---
 
-## Pitfall 2: [nama pitfall] — ditulis oleh [nama]
+## Pitfall 2: Latency Is Zero — ditulis oleh Gevin Shinarsa Pratama
 
-**Bukti di skenario:** [kutip/paraphrase bagian skenario]
+**Bukti di skenario:** Modul Pesanan memanggil modul Pembayaran dan menunggu tanpa batas waktu karena tidak terdapat timeout pada komunikasi antar-service.
 
-**Kenapa ini keliru:** [penjelasan]
+**Kenapa ini keliru:** Dalam sistem terdistribusi, komunikasi antar-service selalu membutuhkan waktu. Latency juga dapat meningkat ketika trafik sedang tinggi atau service yang dituju sedang mengalami beban berat. Jadi, respons dari service tidak dapat dianggap selalu datang dengan cepat.
 
-**Dampak ke FoodGo:** [mekanisme kegagalan konkret]
+**Dampak ke FoodGo:** Saat terjadi lonjakan pesanan, modul Pembayaran menjadi lambat. Modul Pesanan yang menunggu respons tanpa batas waktu menyebabkan banyak request tertahan. Akibatnya resource server semakin banyak digunakan, aplikasi menjadi lambat, request mengalami timeout, dan pada kondisi tertentu server dapat crash.
 
-**Solusi desain awal:** [usulan solusi]
+**Solusi desain awal:** Memberikan timeout pada setiap komunikasi antar-service. Jika proses tidak harus mendapatkan respons secara langsung, FoodGo juga dapat menggunakan message queue dan asynchronous processing.
 
-**Trade-off:** [apa yang dikorbankan/risiko dari solusi ini]
+**Trade-off:** Timeout dapat membuat request lebih cepat dihentikan ketika service lambat, tetapi proses yang sebenarnya masih berjalan mungkin dianggap gagal oleh sistem. Penggunaan message queue juga membuat arsitektur menjadi lebih kompleks.
 
 
 ---
