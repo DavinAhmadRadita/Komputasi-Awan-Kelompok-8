@@ -20,6 +20,7 @@
 **Solusi desain awal:** Menerapkan timeout dan retry dengan exponential backoff pada komunikasi antar-service. Selain itu, dapat digunakan circuit breaker untuk menghentikan sementara request ke service yang sedang mengalami gangguan
 
 **Trade-off:** Retry dapat membantu mengatasi kegagalan sementara, tetapi jika service sedang overload, retry yang terlalu banyak justru dapat menambah beban dan menyebabkan cascading failure. Karena itu jumlah retry harus dibatasi
+
 ---
 
 ## Pitfall 2: [nama pitfall] — ditulis oleh [nama]
