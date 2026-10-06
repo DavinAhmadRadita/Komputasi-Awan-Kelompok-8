@@ -54,6 +54,7 @@ Memisahkan modul menjadi beberapa service, misalnya Order Service, Payment Servi
 
 **Trade-off:**
 Memisahkan sistem menjadi beberapa service meningkatkan skalabilitas dan reliability, tetapi membuat sistem lebih kompleks. FoodGo harus menangani komunikasi antar-service, deployment yang lebih banyak, monitoring, serta kemungkinan kegagalan jaringan antar-service.
+
 ---
 
 ## Kesimpulan Kelompok
