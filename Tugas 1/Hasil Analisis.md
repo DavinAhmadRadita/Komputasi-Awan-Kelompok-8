@@ -38,10 +38,22 @@
 
 ---
 
-## Pitfall 3: [nama pitfall] — ditulis oleh [nama]
+## Pitfall 3: Single Point of Failure — ditulis oleh Yoga Krisna Putra
 
-(ulangi struktur di atas)
+**Bukti di skenario:**
+Satu server menangani seluruh modul FoodGo, yaitu pesanan, pembayaran, dan notifikasi kurir dalam satu proses monolitik yang sama.
 
+**Kenapa ini keliru:**
+Ketika semua fungsi bergantung pada satu server dan satu proses, server tersebut menjadi single point of failure. Jika server mengalami overload atau crash, seluruh fungsi aplikasi dapat ikut berhenti.
+
+**Dampak ke FoodGo:**
+Ketika trafik meningkat pada jam makan siang atau saat promo besar, satu server harus menangani banyak request dari berbagai modul. Server akhirnya kewalahan dan dapat crash total, sehingga layanan pesanan, pembayaran, dan notifikasi kurir ikut terganggu dan membutuhkan restart manual.
+
+**Solusi desain awal:**
+Memisahkan modul menjadi beberapa service, misalnya Order Service, Payment Service, dan Notification Service. Setiap service dapat dijalankan pada beberapa instance dan menggunakan load balancer sehingga beban tidak hanya ditanggung oleh satu server.
+
+**Trade-off:**
+Memisahkan sistem menjadi beberapa service meningkatkan skalabilitas dan reliability, tetapi membuat sistem lebih kompleks. FoodGo harus menangani komunikasi antar-service, deployment yang lebih banyak, monitoring, serta kemungkinan kegagalan jaringan antar-service.
 ---
 
 ## Kesimpulan Kelompok
