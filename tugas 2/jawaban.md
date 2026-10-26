@@ -28,3 +28,65 @@ Sementara itu, *Publish-Subscribe* digunakan untuk mengirimkan informasi antar-l
 
 Kombinasi kedua arsitektur ini dipilih karena FoodGo membutuhkan sistem yang bisa menangani banyak pesanan sekaligus tanpa membuat semua fitur saling mengganggu. Komunikasi sinkron digunakan untuk proses yang membutuhkan jawaban langsung, seperti pengecekan menu dan harga. Sementara itu, komunikasi asinkron digunakan untuk proses yang tidak harus langsung selesai, seperti pengiriman notifikasi dan pembaruan status pesanan. Dengan cara ini, FoodGo lebih mudah dikembangkan dan diperbarui, serta risiko gangguan pada satu layanan memengaruhi seluruh sistem dapat dikurangi.
 
+## 2. Diagram Arsitektur dan Interaksi Komponen
+
+Diagram berikut menunjukkan komponen utama FoodGo dan hubungan komunikasinya.
+
+```mermaid
+flowchart LR
+    P["Pelanggan"]
+    API["API Gateway"]
+    O["Service Pesanan"]
+    K["Service Katalog Resto"]
+    PAY["Service Pembayaran"]
+    PG["Payment Gateway"]
+    MB[("Message Broker")]
+    R["Service Restoran"]
+    C["Service Notifikasi Kurir"]
+    D["Kurir"]
+
+    P -->|"HTTP Request: Membuat Pesanan"| API
+    API -->|"Request-Response"| O
+
+    O -->|"Validasi Menu dan Harga"| K
+    K -->|"Hasil Validasi"| O
+
+    O -->|"Request Pembayaran"| PAY
+    PAY -->|"Request Pembayaran"| PG
+    PG -->|"Hasil Pembayaran"| PAY
+
+    O -->|"Publish: OrderCreated"| MB
+    MB -->|"Subscribe: OrderCreated"| PAY
+
+    PAY -->|"Publish: PaymentSucceeded / PaymentFailed"| MB
+    MB -->|"Event Hasil Pembayaran"| O
+
+    O -->|"Publish: OrderPaid"| MB
+    MB -->|"Subscribe: OrderPaid"| R
+
+    R -->|"Publish: RestaurantAccepted"| MB
+    MB -->|"Subscribe: RestaurantAccepted"| C
+
+    C -->|"Penugasan Kurir"| D
+    C -->|"Notifikasi Status Pesanan"| P
+
+    classDef client fill:#dbeafe,stroke:#2563eb,color:#111827
+    classDef service fill:#dcfce7,stroke:#16a34a,color:#111827
+    classDef infrastructure fill:#fef3c7,stroke:#d97706,color:#111827
+    class P,D client
+    class O,K,PAY,R,C service
+    class API,PG,MB infrastructure
+```
+
+**Keterangan Komponen:**
+
+- Pelanggan: Orang yang menggunakan FoodGo untuk memesan makanan dan melihat status pesanannya.
+- API Gateway: Bagian yang menerima permintaan dari pelanggan dan mengarahkannya ke layanan yang sesuai.
+- Service Pesanan: Mengurus pesanan pelanggan, mulai dari dibuat sampai statusnya diperbarui.
+- Service Pembayaran: Menangani proses pembayaran pesanan pelanggan.
+- Service Katalog Resto: Menyimpan dan menampilkan informasi menu, harga, serta ketersediaan makanan.
+- Service Restoran: Menerima pesanan yang masuk dan memberikan konfirmasi dari pihak restoran.
+- Service Notifikasi Kurir: Mengatur informasi penugasan kurir dan mengirimkan notifikasi terkait pesanan.
+- Message Broker: Menjadi perantara untuk mengirimkan pesan atau event ke layanan lain yang membutuhkannya.
+- Payment Gateway: Membantu memproses transaksi pembayaran pelanggan.
+- Kurir: Pihak yang bertugas mengambil pesanan dari restoran dan mengantarkannya ke pelanggan.
