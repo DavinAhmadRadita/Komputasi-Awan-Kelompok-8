@@ -90,3 +90,27 @@ flowchart LR
 - Message Broker: Menjadi perantara untuk mengirimkan pesan atau event ke layanan lain yang membutuhkannya.
 - Payment Gateway: Membantu memproses transaksi pembayaran pelanggan.
 - Kurir: Pihak yang bertugas mengambil pesanan dari restoran dan mengantarkannya ke pelanggan.
+
+## 3. Alur Skenario End-to-End FoodGo
+
+Skenario dimulai ketika pelanggan memesan makanan lewat aplikasi FoodGo sampai kurir ditugaskan untuk mengantarkan pesanan, saya melihat proses ini sangat efisien.
+
+1. Pelanggan membuat pesanan. Pelanggan memilih menu dan membuat pesanan lewat API Gateway. Kemudian, Service Pesanan meminta Service Katalog Resto memeriksa ketersediaan menu dan harga secara sinkron (request-response).
+
+2. Proses pembayaran. Setelah pesanan dibuat, Service Pesanan meminta Service Pembayaran memproses transaksi. Service Pembayaran berkomunikasi dengan Payment Gateway memverifikasi pembayaran secara sinkron. Jika pembayaran berhasil, Service Pembayaran mengirim event PembayaranBerhasil ke Message Broker secara asinkron.
+
+3. Restoran menerima notifikasi. Service Pesanan menerima event pembayaran berhasil dan memperbarui status pesanan menjadi dibayar. Service Restoran menerima informasi pesanan lewat event dari Message Broker dan mengirim konfirmasi bahwa pesanan diterima.
+
+4. Kurir ditugaskan. Setelah restoran mengonfirmasi pesanan, Service Notifikasi Kurir menerima event lewat Message Broker. Sistem menentukan kurir yang tersedia dan mengirim notifikasi penugasan kepada kurir secara asinkron.
+
+5. Pelanggan menerima pembaruan. Service Notifikasi Kurir mengirim informasi status terbaru ke pelanggan, sehingga pelanggan tahu pesanan sedang diproses dan kurir sudah ditugaskan.
+
+Dengan alur tersebut, komunikasi sinkron dipakai untuk proses yang butuh respons langsung, seperti pengecekan menu dan pembayaran. Sementara komunikasi asinkron lewat Message Broker dipakai untuk menyampaikan event, memperbarui status pesanan, dan mengirim notifikasi tanpa memaksa semua layanan berkomunikasi langsung.
+
+## 4. Analisis Gaya Arsitektur dan Trade-off
+
+Kombinasi SOA dan Publish-Subscribe mengurangi coupling karena setiap layanan FoodGo punya tugas sendiri dan berkomunikasi lewat antarmuka atau event yang sudah ditentukan. Misalnya, Service Pembayaran cukup mengirim event pembayaran berhasil tanpa harus tahu layanan mana saja yang akan menggunakannya. Ini memudahkan pengembangan dan perubahan layanan secara terpisah, saya yakin.
+
+Namun, arsitektur ini punya beberapa kekurangan. Penggunaan Message Broker membuat komunikasi lebih kompleks karena alur event tidak selalu berjalan berurutan. Sistem juga harus menangani pesan terlambat, gagal terkirim, atau diproses lebih dari satu kali. Karena itu, FoodGo butuh pencatatan log, mekanisme percobaan ulang (retry), dan pemantauan pesan supaya sistem tetap berjalan dengan baik.
+
+Kesimpulannya, kombinasi SOA dan Publish-Subscribe cocok untuk FoodGo karena membuat layanan lebih fleksibel, mengurangi ketergantungan antar komponen, dan mendukung pemrosesan banyak pesanan sekaligus. Trade-off berupa kompleksitas pengelolaan pesan dapat diatasi dengan mekanisme pemantauan dan penanganan kesalahan yang tepat.
