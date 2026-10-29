@@ -93,7 +93,7 @@ flowchart LR
 
 ## 3. Alur Skenario End-to-End FoodGo
 
-
+```mermaid
 sequenceDiagram
     autonumber
     actor P as Pelanggan
@@ -107,12 +107,12 @@ sequenceDiagram
     participant C as Service Notifikasi Kurir
     actor D as Kurir
 
-    P->>API: Membuat pesanan (HTTP)
+    P->>API: Membuat pesanan
     API->>O: Mengirim data pesanan
-    O->>K: Validasi menu dan harga (sinkron)
+    O->>K: Validasi menu dan harga
     K-->>O: Hasil validasi
 
-    O->>MB: Publish OrderCreated (asinkron)
+    O->>MB: Publish OrderCreated
     MB-->>PAY: Event OrderCreated
 
     PAY->>PG: Memproses pembayaran
@@ -121,24 +121,24 @@ sequenceDiagram
     alt Pembayaran berhasil
         PAY->>MB: Publish PaymentSucceeded
         MB-->>O: Event PaymentSucceeded
-        O->>O: Memperbarui status menjadi PAID
+        O->>O: Update status menjadi PAID
 
         O->>MB: Publish OrderPaid
         MB-->>R: Event OrderPaid
-        R->>R: Memeriksa dan menerima pesanan
+        R->>R: Memproses pesanan restoran
 
         R->>MB: Publish RestaurantAccepted
         MB-->>C: Event RestaurantAccepted
 
-        C->>D: Mengirim penugasan kurir
-        C-->>P: Mengirim notifikasi status pesanan
+        C->>D: Penugasan kurir
+        C-->>P: Notifikasi status pesanan
     else Pembayaran gagal
         PAY->>MB: Publish PaymentFailed
         MB-->>O: Event PaymentFailed
-        O->>O: Memperbarui status menjadi PAYMENT_FAILED
+        O->>O: Update status menjadi PAYMENT_FAILED
         O-->>P: Informasi pembayaran gagal
     end
-
+```
 
 Skenario ini dimulai saat pelanggan memesan makanan lewat aplikasi FoodGo dan berlanjut hingga kurir mendapatkan tugas untuk mengantarkan pesanan.
 
