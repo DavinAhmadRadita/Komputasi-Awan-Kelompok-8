@@ -93,6 +93,53 @@ flowchart LR
 
 ## 3. Alur Skenario End-to-End FoodGo
 
+
+sequenceDiagram
+    autonumber
+    actor P as Pelanggan
+    participant API as API Gateway
+    participant O as Service Pesanan
+    participant K as Service Katalog Resto
+    participant PAY as Service Pembayaran
+    participant PG as Payment Gateway
+    participant MB as Message Broker
+    participant R as Service Restoran
+    participant C as Service Notifikasi Kurir
+    actor D as Kurir
+
+    P->>API: Membuat pesanan (HTTP)
+    API->>O: Mengirim data pesanan
+    O->>K: Validasi menu dan harga (sinkron)
+    K-->>O: Hasil validasi
+
+    O->>MB: Publish OrderCreated (asinkron)
+    MB-->>PAY: Event OrderCreated
+
+    PAY->>PG: Memproses pembayaran
+    PG-->>PAY: Hasil pembayaran
+
+    alt Pembayaran berhasil
+        PAY->>MB: Publish PaymentSucceeded
+        MB-->>O: Event PaymentSucceeded
+        O->>O: Memperbarui status menjadi PAID
+
+        O->>MB: Publish OrderPaid
+        MB-->>R: Event OrderPaid
+        R->>R: Memeriksa dan menerima pesanan
+
+        R->>MB: Publish RestaurantAccepted
+        MB-->>C: Event RestaurantAccepted
+
+        C->>D: Mengirim penugasan kurir
+        C-->>P: Mengirim notifikasi status pesanan
+    else Pembayaran gagal
+        PAY->>MB: Publish PaymentFailed
+        MB-->>O: Event PaymentFailed
+        O->>O: Memperbarui status menjadi PAYMENT_FAILED
+        O-->>P: Informasi pembayaran gagal
+    end
+
+
 Skenario ini dimulai saat pelanggan memesan makanan lewat aplikasi FoodGo dan berlanjut hingga kurir mendapatkan tugas untuk mengantarkan pesanan.
 
 1. **Pelanggan membuat pesanan.** Pelanggan memilih menu makanan dan mengirim pesanan melalui API Gateway. Lalu, Service Pesanan langsung berkomunikasi dengan Service Katalog Resto untuk memeriksa harga dan apakah menu masih tersedia. Komunikasi ini bersifat sinkron, artinya Service Pesanan harus menunggu jawaban dari Service Katalog Resto sebelum melanjutkan.
