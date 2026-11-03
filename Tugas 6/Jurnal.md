@@ -58,3 +58,31 @@ Kebijakan **Level 2 (AI Assisted Idea Generation & Structuring)** berlaku — li
 
 
 # Jawaban
+1. Konsep simulasi Chord
+Gunakan ruang hash dengan \(m=8\), sehingga jumlah ID yang tersedia:
+\[
+2^8=256
+\]
+
+Rentang ID adalah 0 sampai 255. Setiap node dan ID kurir dipetakan ke ruang hash tersebut.
+
+Contoh data ilustrasi:
+Node	Hash ID
+Node A	20
+Node B	90
+Node C	170
+
+Kurir	Hash ID
+Kurir 101	45
+Kurir 102	120
+Kurir 103	200
+
+Aturan Chord: sebuah key dimiliki oleh node pertama yang memiliki ID sama dengan atau lebih besar dari hash key tersebut. Jika tidak ada node yang memenuhi, pencarian kembali ke node dengan ID terkecil.
+
+Hasil pemetaan contoh:
+Kurir	Hash kurir	Node pemilik
+101	45	Node B (90)
+102	120	Node C (170)
+103	200	Node A (20), karena wrap-around
+
+Angka di atas hanya ilustrasi. Untuk laporan akhir, gunakan angka yang benar-benar dihasilkan programmu.
